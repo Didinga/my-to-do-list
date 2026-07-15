@@ -5,10 +5,15 @@ from flask import Flask, render_template, request, redirect
 import sqlite3
 
 app = Flask(__name__)
+app.config.setdefault('DATABASE', 'tasks.db')
+
+
+def get_db_path():
+    return app.config['DATABASE']
 
 
 def init_db():
-    with sqlite3.connect('tasks.db') as conn:
+    with sqlite3.connect(get_db_path()) as conn:
         conn.execute(
             'CREATE TABLE IF NOT EXISTS tasks '
             '(id INTEGER PRIMARY KEY, content TEXT, completed INTEGER DEFAULT 0)'
@@ -17,7 +22,7 @@ def init_db():
 
 @app.route('/')
 def index():
-    with sqlite3.connect('tasks.db') as conn:
+    with sqlite3.connect(get_db_path()) as conn:
         tasks = conn.execute('SELECT * FROM tasks').fetchall()
     return render_template('index.html', tasks=tasks)
 
@@ -26,14 +31,14 @@ def index():
 def add():
     task = request.form.get('task', '').strip()
     if task and len(task) <= 200:
-        with sqlite3.connect('tasks.db') as conn:
+        with sqlite3.connect(get_db_path()) as conn:
             conn.execute('INSERT INTO tasks (content) VALUES (?)', (task,))
     return redirect('/')
 
 
 @app.route('/done/<int:task_id>', methods=['POST'])
 def done(task_id):
-    with sqlite3.connect('tasks.db') as conn:
+    with sqlite3.connect(get_db_path()) as conn:
         conn.execute(
             'UPDATE tasks SET completed = 1 - completed WHERE id = ?', (task_id,)
         )
@@ -42,7 +47,7 @@ def done(task_id):
 
 @app.route('/delete/<int:task_id>', methods=['POST'])
 def delete(task_id):
-    with sqlite3.connect('tasks.db') as conn:
+    with sqlite3.connect(get_db_path()) as conn:
         conn.execute('DELETE FROM tasks WHERE id = ?', (task_id,))
     return redirect('/')
 
