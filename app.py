@@ -1,11 +1,19 @@
+import os
+
 from flask import Flask, render_template, request, redirect
+
 import sqlite3
 
 app = Flask(__name__)
 
+
 def init_db():
     with sqlite3.connect('tasks.db') as conn:
-        conn.execute('CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY, content TEXT, completed INTEGER DEFAULT 0)')
+        conn.execute(
+            'CREATE TABLE IF NOT EXISTS tasks '
+            '(id INTEGER PRIMARY KEY, content TEXT, completed INTEGER DEFAULT 0)'
+        )
+
 
 @app.route('/')
 def index():
@@ -13,26 +21,33 @@ def index():
         tasks = conn.execute('SELECT * FROM tasks').fetchall()
     return render_template('index.html', tasks=tasks)
 
+
 @app.route('/add', methods=['POST'])
 def add():
-    task = request.form.get('task')
-    if task:
+    task = request.form.get('task', '').strip()
+    if task and len(task) <= 200:
         with sqlite3.connect('tasks.db') as conn:
             conn.execute('INSERT INTO tasks (content) VALUES (?)', (task,))
     return redirect('/')
 
-@app.route('/done/<int:task_id>')
+
+@app.route('/done/<int:task_id>', methods=['POST'])
 def done(task_id):
     with sqlite3.connect('tasks.db') as conn:
-        conn.execute('UPDATE tasks SET completed = 1 - completed WHERE id = ?', (task_id,))
+        conn.execute(
+            'UPDATE tasks SET completed = 1 - completed WHERE id = ?', (task_id,)
+        )
     return redirect('/')
 
-@app.route('/delete/<int:task_id>')
+
+@app.route('/delete/<int:task_id>', methods=['POST'])
 def delete(task_id):
     with sqlite3.connect('tasks.db') as conn:
         conn.execute('DELETE FROM tasks WHERE id = ?', (task_id,))
     return redirect('/')
 
+
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True)
+    debug_mode = os.environ.get('FLASK_DEBUG', '0') == '1'
+    app.run(debug=debug_mode)
