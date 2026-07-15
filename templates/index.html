@@ -1,36 +1,43 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-    <meta charset="UTF-8">
-    <title>Můj To-Do List</title>
-    <style>
-        body { font-family: sans-serif; max-width: 400px; margin: 50px auto; text-align: center; }
-        ul { list-style: none; padding: 0; }
-        li { background: #eee; margin: 5px 0; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .completed { text-decoration: line-through; color: gray; }
-        .task-text { cursor: pointer; flex-grow: 1; text-align: left; }
-        .actions a { margin-left: 10px; text-decoration: none; font-weight: bold; }
-        .delete { color: red; }
-    </style>
+<meta charset="UTF-8">
+<title>Můj To-Do List</title>
+<style>
+body { font-family: sans-serif; max-width: 400px; margin: 50px auto; text-align: center; }
+ul { list-style: none; padding: 0; }
+li { background: #eee; margin: 5px 0; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
+.completed { text-decoration: line-through; color: gray; }
+.task-text { cursor: pointer; flex-grow: 1; text-align: left; background: none; border: none; font: inherit; padding: 0; }
+.actions form { display: inline; margin-left: 10px; }
+.actions button { border: none; background: none; font-weight: bold; cursor: pointer; font: inherit; }
+.delete { color: red; }
+</style>
 </head>
 <body>
-    <h2>To-Do List</h2>
-    <form action="/add" method="POST">
-        <input type="text" name="task" placeholder="Co je třeba udělat?" required>
-        <button type="submit">Přidat</button>
-    </form>
-    <ul>
-        {% for task in tasks %}
-            <li>
-                <span class="task-text {{ 'completed' if task[2] == 1 }}" 
-                      onclick="window.location.href='/done/{{ task[0] }}'">
-                    {{ task[1] }}
-                </span>
-                <div class="actions">
-                    <a href="/delete/{{ task[0] }}" class="delete">X</a>
-                </div>
-            </li>
-        {% endfor %}
-    </ul>
+<h2>To-Do List</h2>
+
+<form action="/add" method="POST">
+    <input type="text" name="task" placeholder="Co je třeba udělat?" required>
+    <button type="submit">Přidat</button>
+</form>
+
+<ul>
+{% for task in tasks %}
+    <li>
+        <form action="/done/{{ task[0] }}" method="POST" style="display:inline; flex-grow:1;">
+            <button type="submit" class="task-text {{ 'completed' if task[2] == 1 }}">
+                {{ task[1] }}
+            </button>
+        </form>
+        <div class="actions">
+            <form action="/delete/{{ task[0] }}" method="POST">
+                <button type="submit" class="delete">X</button>
+            </form>
+        </div>
+    </li>
+{% endfor %}
+</ul>
+
 </body>
 </html>
