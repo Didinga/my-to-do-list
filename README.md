@@ -76,7 +76,6 @@ The app will be available at `http://127.0.0.1:5000`.
 ## Planned Improvements
 
 - [ ] Docker support
-- [ ] CI/CD pipeline
 - [ ] Migrate to FastAPI
 - [ ] Switch to PostgreSQL
 
